@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "flake8-numba"
+name = "flake8_numba"
 version = "0.1.0"
 description = "Perform checks over numba usage"
 authors = ["Manuel Floriano Vázquez <mflovaa@gmail.com>"]
 readme = "README.md"
-# packages = [{include = "flake8_numba"}]
+packages = [{include = "flake8_numba"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -27,6 +27,7 @@ codespell = "*"  # Spell checker
 yamllint = "*"  # Check quality or bugs for yaml files
 pyanalyze = "*"  # Dynamically check python code
 types-PyYaml = "*"  # Stubs for yaml
+typing_extensions = "*"
 
 [build-system]
 requires = ["poetry-core"]
@@ -46,7 +47,10 @@ strict = true
 
 [tool.pytest.ini_options]
 norecursedirs = ".venv"
-addopts = "--tb=line --cov=flake8_numba --cov-report term --cov-fail-under=90 tests"
+testpaths = ["tests"]
+# Coverage is lowered down till there are rules implemented
+addopts = "--cov=flake8_numba --cov-report term-missing --cov-fail-under=20"
+
 
 [tool.codespell]
 skip = '.venv'

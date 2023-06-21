@@ -144,8 +144,7 @@ def run_tool(
     # For those tools that print errors into stdout instead of stderr, copy
     # problems into err_str
     if status is False:
-        if output_str and not err_str:
-            err_str = output_str
+        err_str += output_str
 
     # Filter output
     err_lines = err_str.split("\n")
