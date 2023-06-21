@@ -1,0 +1,53 @@
+# Tools that `check_code.py` will run. Keys that can be defined:
+# tool [MANDATORY]: Tool that will bee used. Must be in dev dependencies from poetry.
+# tool_desc: Description of the tool that will be printed.
+# suggestions: Suggestions about what to do it tool fails
+# extra_args: Extra arguments that will be passed after {tool} keyword.
+# ignore: From the returned string when the tool fails, lines that have these words will be removed from the output.
+# only_include: From the returned string when the tool fails, only these lines containing these strings will be
+#   included.
+# pass_if_output_contains: Although the return code might be ERROR, it will be considered OK if the output string
+#   contains any of these strings.
+
+- tool: codespell
+  tool_desc: Check for typos
+
+- tool: black
+  path: .
+  extra_args: --check
+  tool_desc: Check format of the Python code
+  suggestions: Run `poetry run black .` before calling the script to reformat code and fix it.
+  ignore: # These lines were just too verbosed, so they are just ignored
+    - Skipping .ipynb
+    - You can fix this by running
+    - Oh no
+
+- tool: ruff
+  path: .
+  tool_desc: Statically check Python code
+  suggestions:
+    [
+      "If you need a description for the rule, call `poetry run ruff rule <RULE_CODE>`",
+      "If it is a false positive, add `# noqa: <RULE_CODE>` next to the triggering line",
+    ]
+
+- tool: pyanalyze
+  path: "flake8_numba"
+  tool_desc: Perform semi-static analysis check.
+  only_include: ["code: ", "at line "]
+  suggestions: ["If it is a false positive, add `# static analysis: ignore` Python comment next to the triggering line"]
+
+- tool: mypy
+  path: .
+  tool_desc: Check type coherency within the Python code
+  suggestions: ["If it is a false positive, add `# type: ignore` next to the triggering line"]
+
+- tool: pytest
+  tool_desc: Launch all tests in the repository
+  suggestions: Not all tests passed. Run `poetry run pytest -vv` to get a better colored output
+
+- tool: pytest
+  extra_args: --dead-fixtures
+  tool_desc: Check unused pytest fixtures
+  suggestions: Some test fixtures are not used. Remove the unused ones indicated below
+  pass_if_output_contains: "Cool, every declared fixture is being used"
