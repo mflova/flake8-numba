@@ -43,8 +43,9 @@
   suggestions: ["If it is a false positive, add `# type: ignore` next to the triggering line"]
 
 - tool: pytest
+  extra_args: --tb=line
   tool_desc: Launch all tests in the repository
-  suggestions: Not all tests passed. Run `poetry run pytest -vv` to get a better colored output
+  suggestions: Run `poetry run pytest -vv` to get a better colored output
 
 - tool: pytest
   extra_args: --dead-fixtures
