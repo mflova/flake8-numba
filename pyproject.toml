@@ -10,6 +10,7 @@ readme = "README.md"
 python = "^3.9"
 
 [tool.poetry.dev-dependencies]
+poetry = "*"
 pytest = "*"  # Testing
 pytest-clarity = "*"  # Much better output when pytest called with -vv
 pytest-deadfixtures = "*"  # Check for unused fixtures

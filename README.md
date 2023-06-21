@@ -26,6 +26,8 @@ These tools can be easily launched with:
 
 ```shell
 poetry run python check_code.py
+poetry run python check_code.py --auto-run  # Creates a pre-push hook
+poetry run python check_code.py --disable-auto-run  # Disables pre-push hook
 ```
 
 Or you can run them separately as:
