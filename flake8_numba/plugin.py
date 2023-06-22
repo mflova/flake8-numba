@@ -9,6 +9,7 @@ from flake8_numba.visitor import Visitor
 
 class Plugin:
     """Class used by Flake8 to find specific issues."""
+
     name = __name__.split(".", 1)[0]
     version = importlib_metadata.version(name)
 

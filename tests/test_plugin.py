@@ -2,7 +2,7 @@ import ast
 
 import pytest
 
-from flake8_numba import Plugin
+from flake8_numba.plugin import Plugin
 
 
 class TestPlugin:
