@@ -4,6 +4,26 @@ This logic is in charge of executing specific code whenever some specific nodes 
 the code are detected.
 """
 import ast
+import inspect
+from functools import lru_cache
+from typing import Final
+from collections.abc import Sequence
+
+from flake8_numba.rule import Rule
+from flake8_numba.rules import nba2
+
+_PREFIX: Final = "NBA"
+"""Prefix used for defining all rules."""
+
+
+@lru_cache
+def _all_function_def_based_rules() -> Sequence[Rule]:
+    members = inspect.getmembers(nba2)
+    return [
+        elem[1]  # type: ignore
+        for elem in members
+        if inspect.isclass(elem[1]) and _PREFIX in elem[1].__name__
+    ]
 
 
 class Visitor(ast.NodeVisitor):
@@ -20,14 +40,6 @@ class Visitor(ast.NodeVisitor):
             node (ast.FunctionDef): Node containing all the information relative to
                 the function definition.
         """
-        self.generic_visit(node)
-
-    def visit_Return(self, node: ast.Return) -> None:  # noqa: N802
-        """Called whenever a function returns a value.
-
-        Args:
-            node (ast.FunctionDef): Node containing all the information relative to
-                the return value.
-        """
-        # print("Return value:", ast.dump(node.value))
+        for rule in _all_function_def_based_rules():
+            self.errors.extend(rule.check(node))
         self.generic_visit(node)

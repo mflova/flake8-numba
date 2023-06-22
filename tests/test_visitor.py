@@ -2,7 +2,7 @@ import ast
 
 import pytest
 
-from flake8_numba import Visitor
+from flake8_numba.visitor import Visitor
 
 
 class TestVisitor:
