@@ -299,6 +299,7 @@ def main(auto_run: bool, disable_auto_run: bool) -> None:
     args = read_and_parse_args()
     num_workers = min(multiprocessing.cpu_count(), len(args))
 
+    subprocess.Popen("cls", shell=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
         futures = [executor.submit(run_tool_from_dct, args_) for args_ in args]
 
