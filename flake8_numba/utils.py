@@ -1,6 +1,6 @@
 import ast
 from collections.abc import Iterable
-from typing import Union, NamedTuple
+from typing import NamedTuple, Union
 
 
 class Location(NamedTuple):
