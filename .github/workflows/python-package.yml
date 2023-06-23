@@ -27,4 +27,4 @@ jobs:
           python3 -m poetry install
       - name: Check code
         run: |
-          python3 -m poetry run python check_code.py --disable-parallel
+          python3 -m poetry run python check_code.py
