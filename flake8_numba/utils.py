@@ -1,6 +1,6 @@
 import ast
 from collections.abc import Iterable
-from typing import Literal, NamedTuple, Union, overload
+from typing import Literal, NamedTuple, Optional, Union, overload
 
 
 class Location(NamedTuple):
@@ -105,7 +105,7 @@ def get_decorator_n_args(node: ast.FunctionDef, arg_type: str = "") -> int:
         if isinstance(decorator, ast.Call) and decorator.args:
             if arg_type in ("args", ""):
                 for arg in decorator.args:
-                    if isinstance(arg, (ast.Name, ast.Constant)):
+                    if isinstance(arg, ast.AST):
                         args_count += 1
         if isinstance(decorator, ast.Call) and decorator.keywords:
             if arg_type in ("kwargs", ""):
@@ -113,3 +113,16 @@ def get_decorator_n_args(node: ast.FunctionDef, arg_type: str = "") -> int:
                     if isinstance(keyword, ast.keyword):
                         args_count += 1
     return args_count
+
+
+def get_pos_arg_from_decorator(at: int, node: ast.FunctionDef) -> Optional[str]:
+    if not node.decorator_list or not decorator_has_arguments(node):
+        return None
+
+    if at >= get_decorator_n_args(node, "args"):
+        return None
+
+    try:
+        return ast.unparse(node.decorator_list[0].args[at])  # type: ignore
+    except ValueError:
+        return None
