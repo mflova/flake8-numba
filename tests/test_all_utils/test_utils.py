@@ -67,3 +67,99 @@ class TestIsDecoratedWith:
             node (ast.FunctionDef): Node representing the function stored in `relative_path`
         """
         assert is_decorated_with_guvec == utils.is_decorated_with("guvectorize", node)
+
+
+class TestDecoratorHasArguments:
+    @pytest.mark.parametrize(
+        "relative_path, decorator_has_arguments",
+        [
+            ("data/decorator_has_arguments/func_with_decorator_and_arguments", True),
+            ("data/decorator_has_arguments/func_with_decorator", False),
+            ("data/decorator_has_arguments/func_with_no_decorator", False),
+        ],
+    )
+    def test_decorator_has_arguments(
+        self, relative_path: str, decorator_has_arguments: bool, node: ast.FunctionDef
+    ) -> None:
+        """Test that for multiple given functions, the function returns the expected value.
+
+        Args:
+            relative_path (str): Relative path where the function is located.
+            decorator_has_arguments (bool): Expected output of the function to be tested.
+            node (ast.FunctionDef): Node representing the function stored in `relative_path`
+        """
+        assert decorator_has_arguments == utils.decorator_has_arguments(node)
+
+
+class TestGetDecoratorNArgs:
+    @pytest.mark.parametrize(
+        "relative_path, n_positional_args_in_decorator",
+        [
+            ("data/get_decorator_n_args/func_with_no_decorator", 0),
+            ("data/get_decorator_n_args/func_with_decorator", 0),
+            ("data/get_decorator_n_args/func_with_decorator_and_parenthesis", 0),
+            ("data/get_decorator_n_args/func_with_2_pos_args", 2),
+            ("data/get_decorator_n_args/func_with_2_pos_args_and_kwargs", 2),
+        ],
+    )
+    def test_get_n_positional_args_decorator(
+        self,
+        relative_path: str,
+        n_positional_args_in_decorator: bool,
+        node: ast.FunctionDef,
+    ) -> None:
+        """Test that for multiple given functions, the function returns the expected value.
+
+        Args:
+            relative_path (str): Relative path where the function is located.
+            n_positional_args_in_decorator (int): Number of positional arguments defined
+                in decorator at `relative_path`
+            node (ast.FunctionDef): Node representing the function stored in `relative_path`
+        """
+        assert n_positional_args_in_decorator == utils.get_decorator_n_args(
+            node, arg_type="args"
+        )
+
+    @pytest.mark.parametrize(
+        "relative_path, n_kwargs_in_decorator",
+        [
+            ("data/get_decorator_n_args/func_with_no_decorator", 0),
+            ("data/get_decorator_n_args/func_with_decorator", 0),
+            ("data/get_decorator_n_args/func_with_decorator_and_parenthesis", 0),
+            ("data/get_decorator_n_args/func_with_2_kwargs", 2),
+            ("data/get_decorator_n_args/func_with_2_kwargs_and_args", 2),
+        ],
+    )
+    def test_get_n_kwargs_decorator(
+        self, relative_path: str, n_kwargs_in_decorator: bool, node: ast.FunctionDef
+    ) -> None:
+        """Test that for multiple given functions, the function returns the expected value.
+
+        Args:
+            relative_path (str): Relative path where the function is located.
+            n_positional_args_in_decorator (int): Number of positional arguments defined
+                in decorator at `relative_path`
+            node (ast.FunctionDef): Node representing the function stored in `relative_path`
+        """
+        assert n_kwargs_in_decorator == utils.get_decorator_n_args(
+            node, arg_type="kwargs"
+        )
+
+    @pytest.mark.parametrize(
+        "relative_path, n_args_in_decorator",
+        [
+            ("data/get_decorator_n_args/func_with_2_kwargs_and_args", 3),
+        ],
+    )
+    def test_get_n_args_decorator(
+        self, relative_path: str, n_args_in_decorator: bool, node: ast.FunctionDef
+    ) -> None:
+        """Test that for multiple given functions, the function returns the expected value.
+
+        Args:
+            relative_path (str): Relative path where the function is located.
+            n_positional_args_in_decorator (int): Number of positional arguments defined
+                in decorator at `relative_path`
+            node (ast.FunctionDef): Node representing the function stored in `relative_path`
+        """
+        assert n_args_in_decorator == utils.get_decorator_n_args(node)
