@@ -1,6 +1,6 @@
 import ast
 from collections.abc import Iterable
-from typing import Union, NamedTuple
+from typing import Literal, NamedTuple, Optional, Union, overload
 
 
 class Location(NamedTuple):
@@ -49,3 +49,80 @@ def has_return_value(func_ast: ast.FunctionDef) -> tuple[bool, Location]:
         if isinstance(node, ast.Return) and node.value is not None:
             return True, Location(line=node.lineno, column=node.col_offset)
     return False, Location()
+
+
+def decorator_has_arguments(node: ast.FunctionDef) -> bool:
+    """Check whether a function has a decortor with arguments.
+
+    Args:
+        node (ast.FunctionDef): Node representing the function definition.
+
+    Returns:
+        bool: `True` if the function is decorated AND it uses arguments. `False`
+            otherwise.
+    """
+    if not node.decorator_list:
+        return False
+
+    for decorator in node.decorator_list:
+        if isinstance(decorator, ast.Call) and decorator.args:
+            return True
+
+    return False
+
+
+@overload
+def get_decorator_n_args(node: ast.FunctionDef, arg_type: Literal["args"]) -> int:
+    ...
+
+
+@overload
+def get_decorator_n_args(node: ast.FunctionDef, arg_type: Literal["kwargs"]) -> int:
+    ...
+
+
+@overload
+def get_decorator_n_args(node: ast.FunctionDef, arg_type: Literal[""] = "") -> int:
+    ...
+
+
+def get_decorator_n_args(node: ast.FunctionDef, arg_type: str = "") -> int:
+    """Get number of arguments in decorator.
+
+    Args:
+        node (ast.FunctionDef): Node representing the function definition.
+        arg_type (Union[Literal["kwargs"],Literal["args"],Literal[""]]): Specify which
+            arguments are counted. Positional, kwargs or both. Both by default.
+
+    Returns:
+        int: Count of positional arguments for the decorator.
+    """
+    if not node.decorator_list:
+        return 0
+
+    args_count: int = 0
+    for decorator in node.decorator_list:
+        if isinstance(decorator, ast.Call) and decorator.args:
+            if arg_type in ("args", ""):
+                for arg in decorator.args:
+                    if isinstance(arg, ast.AST):
+                        args_count += 1
+        if isinstance(decorator, ast.Call) and decorator.keywords:
+            if arg_type in ("kwargs", ""):
+                for keyword in decorator.keywords:
+                    if isinstance(keyword, ast.keyword):
+                        args_count += 1
+    return args_count
+
+
+def get_pos_arg_from_decorator(at: int, node: ast.FunctionDef) -> Optional[str]:
+    if not node.decorator_list or not decorator_has_arguments(node):
+        return None
+
+    if at >= get_decorator_n_args(node, "args"):
+        return None
+
+    try:
+        return ast.unparse(node.decorator_list[0].args[at])  # type: ignore
+    except ValueError:
+        return None

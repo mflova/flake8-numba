@@ -9,6 +9,17 @@
 # pass_if_output_contains: Although the return code might be ERROR, it will be considered OK if the output string
 #   contains any of these strings.
 
+- tool: pytest
+  extra_args: --tb=line
+  tool_desc: Launch all tests in the repository
+  suggestions: Run `poetry run pytest -vv` to get a better colored output
+
+- tool: pytest
+  extra_args: --dead-fixtures
+  tool_desc: Check unused pytest fixtures
+  suggestions: Some test fixtures are not used. Remove the unused ones indicated below
+  pass_if_output_contains: "Cool, every declared fixture is being used"
+
 - tool: codespell
   tool_desc: Check for typos
 
@@ -41,14 +52,3 @@
   path: .
   tool_desc: Check type coherency within the Python code
   suggestions: ["If it is a false positive, add `# type: ignore` next to the triggering line"]
-
-- tool: pytest
-  extra_args: --tb=line
-  tool_desc: Launch all tests in the repository
-  suggestions: Run `poetry run pytest -vv` to get a better colored output
-
-- tool: pytest
-  extra_args: --dead-fixtures
-  tool_desc: Check unused pytest fixtures
-  suggestions: Some test fixtures are not used. Remove the unused ones indicated below
-  pass_if_output_contains: "Cool, every declared fixture is being used"

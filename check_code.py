@@ -267,20 +267,16 @@ def read_and_parse_args(path: str = "") -> tuple[Mapping[str, Any], ...]:
     help="Enable auto run whenever code is pushed to online repo.",
 )
 @click.option("--disable-auto-run", is_flag=True, help="Disable auto run.")
-def main(auto_run: bool, disable_auto_run: bool) -> None:
+@click.option("--disable-parallel", is_flag=True, help="Disable parallel execution.")
+def main(auto_run: bool, disable_auto_run: bool, disable_parallel: bool) -> None:
     """Run all tools available.
-
-    These are:
-
-    - Linting tools: Ruff
-    - Static type checker: Mypy
-    - Testing tools: Pytest
 
     Args:
         auto_run (bool): `True` will make this script executable whenever you push
             to online repository.
         disable_auto_run (bool): `True` will disable the auto run mode created by
             the previous flag.
+        disable_parallel (bool): Disable parallel execution if set to `True`.
 
     Raises:
         ValueError: _description_
@@ -297,8 +293,12 @@ def main(auto_run: bool, disable_auto_run: bool) -> None:
 
     results: list[bool] = []
     args = read_and_parse_args()
-    num_workers = min(multiprocessing.cpu_count(), len(args))
+    if disable_parallel:  # noqa: SIM108
+        num_workers = 1
+    else:
+        num_workers = min(multiprocessing.cpu_count(), len(args))
 
+    subprocess.Popen("cls", shell=True)
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
         futures = [executor.submit(run_tool_from_dct, args_) for args_ in args]
 
