@@ -1,40 +1,21 @@
 # flake8-numba
 
-Flake8 plugin that performs multiple checks over numba package usage.
+[WORK IN PROGRESS, ALPHA VERSION]
 
-## Contributing
+Improve your Python development experience with `flake8-numba`. This plugin integrates
+with Flake8 to provide comprehensive code analysis for projects that make use of `numba`.
+Catch potential errors and enhance code quality effortlessly with `flake8-numba`.
 
-This repository uses `poetry` for the package and different tools to ensure code quality.
-These are:
+## Installation
 
-- Static type checkers: In order to ensure type safety, [mypy](https://mypy-lang.org/)
-  and [pyanalyze](https://pyanalyze.readthedocs.io/en/latest/) (semi-static) are used.
-- Spell checker: To fix basic typos,
-  [codespell](https://github.com/codespell-project/codespell) is used.
-- Linting: To ensure quality code is created, [ruff](https://beta.ruff.rs/docs/) is used.
-  This tool groups main features provided by [pylint](https://pypi.org/project/pylint/)
-  and [flake8](https://flake8.pycqa.org/en/latest/) but it is extremely fast and memory
-  safe, as it is implemented in [rust](https://www.rust-lang.org/).
-- Testing: To create easier to maintain code and bug free,
-  [pytest](https://docs.pytest.org/en/7.3.x/) with
-  [pytest-cov](https://pypi.org/project/pytest-cov/) and
-  [pytest-deadfixtures](https://pypi.org/project/pytest-deadfixtures/) are used.
-- Autoformatter: To ensure code is written in a homogeneous way among different
-  developers, [black](https://github.com/psf/black) is being used.
+Make sure that you have `flake8` installed. Then:
 
-These tools can be easily launched with:
-
-```shell
-poetry run python check_code.py
-poetry run python check_code.py --auto-run  # Creates a pre-push hook
-poetry run python check_code.py --disable-auto-run  # Disables pre-push hook
+```
+pip install flake8-numba
 ```
 
-Or you can run them separately as:
+After it calling `flake8` will include all rules defined by this plugin.
 
-```shell
-poetry run pytest
-poetry run black .
-poetry run ruff .
-poetry run codespell .
-```
+## Rules
+
+Available rules can be read in [RULES.md](RULES.md)
