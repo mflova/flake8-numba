@@ -1,3 +1,3 @@
-@guvectorize([float32, float32], [value, value3])
+@guvectorize([float32, float32], [value, "value3"])
 def func() -> None:
     return
