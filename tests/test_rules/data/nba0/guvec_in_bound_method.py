@@ -1,0 +1,3 @@
+@guvectorize
+def g(cls, y, res):
+    ...

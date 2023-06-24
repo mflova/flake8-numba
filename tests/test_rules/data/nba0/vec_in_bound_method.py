@@ -1,0 +1,3 @@
+@vectorize
+def g(cls, y, res):
+    ...

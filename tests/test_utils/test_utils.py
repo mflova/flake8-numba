@@ -1,9 +1,11 @@
-from flake8_numba import utils
-from numba import float32
 import ast
-import pytest
 import os
 from typing import Optional
+
+import pytest
+from numba import float32
+
+from flake8_numba import utils
 
 
 @pytest.fixture
@@ -37,12 +39,13 @@ class TestHasReturnValue:
     def test_has_return_value(
         self, relative_path: str, has_return_value: bool, node: ast.FunctionDef
     ) -> None:
-        """Test that for multiple given functions, the function returns the expected value.
+        """Test that multiple given functions, the function returns the expected value.
 
         Args:
             relative_path (str): Relative path where the function is located.
             has_return_value (bool): Expected output of the function.
-            node (ast.FunctionDef): Node representing the function stored in `relative_path`
+            node (ast.FunctionDef): Node representing the function stored in
+                `relative_path`
         """
         assert has_return_value == utils.has_return_value(node)[0]
 
@@ -61,12 +64,13 @@ class TestIsDecoratedWith:
     def test_is_decorated_with(
         self, relative_path: str, is_decorated_with_guvec: bool, node: ast.FunctionDef
     ) -> None:
-        """Test that for multiple given functions, the function returns the expected value.
+        """Test that multiple given functions, the function returns the expected value.
 
         Args:
             relative_path (str): Relative path where the function is located.
             is_decorated_with_guvec(bool): Expected output of the function to be tested.
-            node (ast.FunctionDef): Node representing the function stored in `relative_path`
+            node (ast.FunctionDef): Node representing the function stored in
+                `relative_path`
         """
         assert is_decorated_with_guvec == utils.is_decorated_with("guvectorize", node)
 
@@ -83,12 +87,13 @@ class TestDecoratorHasArguments:
     def test_decorator_has_arguments(
         self, relative_path: str, decorator_has_arguments: bool, node: ast.FunctionDef
     ) -> None:
-        """Test that for multiple given functions, the function returns the expected value.
+        """Test that multiple given functions, the function returns the expected value.
 
         Args:
             relative_path (str): Relative path where the function is located.
             decorator_has_arguments (bool): Expected output of the function to be tested.
-            node (ast.FunctionDef): Node representing the function stored in `relative_path`
+            node (ast.FunctionDef): Node representing the function stored in
+                `relative_path`
         """
         assert decorator_has_arguments == utils.decorator_has_arguments(node)
 
@@ -109,16 +114,17 @@ class TestGetDecoratorNArgs:
     def test_get_n_positional_args_decorator(
         self,
         relative_path: str,
-        n_positional_args_in_decorator: bool,
+        n_positional_args_in_decorator: int,
         node: ast.FunctionDef,
     ) -> None:
-        """Test that for multiple given functions, the function returns the expected value.
+        """Test that multiple given functions, the function returns the expected value.
 
         Args:
             relative_path (str): Relative path where the function is located.
             n_positional_args_in_decorator (int): Number of positional arguments defined
                 in decorator at `relative_path`
-            node (ast.FunctionDef): Node representing the function stored in `relative_path`
+            node (ast.FunctionDef): Node representing the function stored in
+                `relative_path`
         """
         assert n_positional_args_in_decorator == utils.get_decorator_n_args(
             node, arg_type="args"
@@ -135,15 +141,16 @@ class TestGetDecoratorNArgs:
         ],
     )
     def test_get_n_kwargs_decorator(
-        self, relative_path: str, n_kwargs_in_decorator: bool, node: ast.FunctionDef
+        self, relative_path: str, n_kwargs_in_decorator: int, node: ast.FunctionDef
     ) -> None:
-        """Test that for multiple given functions, the function returns the expected value.
+        """Test that multiple given functions, the function returns the expected value.
 
         Args:
             relative_path (str): Relative path where the function is located.
-            n_positional_args_in_decorator (int): Number of positional arguments defined
+            n_kwargs_in_decorator (int): Number of positional arguments defined
                 in decorator at `relative_path`
-            node (ast.FunctionDef): Node representing the function stored in `relative_path`
+            node (ast.FunctionDef): Node representing the function stored in
+                `relative_path`
         """
         assert n_kwargs_in_decorator == utils.get_decorator_n_args(
             node, arg_type="kwargs"
@@ -158,19 +165,21 @@ class TestGetDecoratorNArgs:
     def test_get_n_args_decorator(
         self, relative_path: str, n_args_in_decorator: bool, node: ast.FunctionDef
     ) -> None:
-        """Test that for multiple given functions, the function returns the expected value.
+        """Test that multiple given functions, the function returns the expected value.
 
         Args:
             relative_path (str): Relative path where the function is located.
-            n_positional_args_in_decorator (int): Number of positional arguments defined
+            n_args_in_decorator (int): Number of positional arguments defined
                 in decorator at `relative_path`
-            node (ast.FunctionDef): Node representing the function stored in `relative_path`
+            node (ast.FunctionDef): Node representing the function stored in
+                `relative_path`
         """
         assert n_args_in_decorator == utils.get_decorator_n_args(node)
 
 
 class TestGetPosArgFromDecorator:
     @pytest.mark.parametrize(
+        # fmt: off
         "relative_path, at, returned_value",
         [
             ("data/get_pos_arg_from_decorator/func_with_no_decorator", 0, None),
@@ -183,17 +192,10 @@ class TestGetPosArgFromDecorator:
             ("data/get_pos_arg_from_decorator/func_with_two_pos_args", 1, "value2"),
             ("data/get_pos_arg_from_decorator/func_with_only_kwargs", 0, None),
             ("data/get_pos_arg_from_decorator/func_with_only_kwargs", 1, None),
-            (
-                "data/get_pos_arg_from_decorator/func_with_mixed_symbols",
-                0,
-                "[float32(float32, value3)]",
-            ),
-            (
-                "data/get_pos_arg_from_decorator/func_with_numba_types",
-                0,
-                [float32(float32, float32)],
-            ),
+            ("data/get_pos_arg_from_decorator/func_with_mixed_symbols", 0, "[float32(float32, value3)]"),  # noqa: E501
+            ("data/get_pos_arg_from_decorator/func_with_numba_types", 0, [float32(float32, float32)]),  # noqa: E501
         ],
+        # fmt: on
     )
     def test_get_n_args_decorator(
         self,
@@ -202,12 +204,13 @@ class TestGetPosArgFromDecorator:
         at: int,
         node: ast.FunctionDef,
     ) -> None:
-        """Test that for multiple given functions, the function returns the expected value.
+        """Test that multiple given functions, the function returns the expected value.
 
         Args:
             relative_path (str): Relative path where the function is located.
             at (int): Index of the positional argument that should be returned.
             returned_value (Optional[object]): Expected returned value from the function.
-            node (ast.FunctionDef): Node representing the function stored in `relative_path`
+            node (ast.FunctionDef): Node representing the function stored in
+                `relative_path`
         """
         assert returned_value == utils.get_pos_arg_from_decorator(at, node)[0]
