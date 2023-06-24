@@ -14,6 +14,62 @@ from flake8_numba.utils import (
 )
 
 
+class NBA203(Rule):
+    """Undefined symbol in second positional argument."""
+
+    @classmethod
+    def check(cls, node: ast.FunctionDef) -> Sequence[Error]:
+        if not is_decorated_with("guvectorize", node):
+            return []
+
+        if get_decorator_n_args(node, "args") != 2:
+            return []
+
+        signature, location = get_pos_arg_from_decorator(1, node)
+        if not isinstance(signature, str):
+            return []
+        count = Counter(signature)
+        if "->" not in signature or count[")"] < 2 or count["("] < 2 or count["-"] > 1:
+            return []
+
+        inputs, outputs = signature.split("->")
+        diff = set(outputs) - set(inputs)
+        for elem in diff:
+            if elem.isalpha():
+                msg = f"NBA203: Symbol `{elem}` must be also defined on the left side."
+                return [Error(location.line, location.column, msg)]
+
+        return []
+
+
+class NBA204(Rule):
+    """Constants are not allowed in second positional argument."""
+
+    @classmethod
+    def check(cls, node: ast.FunctionDef) -> Sequence[Error]:
+        if not is_decorated_with("guvectorize", node):
+            return []
+
+        if get_decorator_n_args(node, "args") != 2:
+            return []
+
+        signature, location = get_pos_arg_from_decorator(1, node)
+        if not isinstance(signature, str):
+            return []
+        count = Counter(signature)
+        if "->" not in signature or count[")"] < 2 or count["("] < 2 or count["-"] > 1:
+            return []
+
+        for elem in signature:
+            if elem.isdigit():
+                msg = (
+                    f"NBA204: Constants (`{elem}`) are not allowed in the second "
+                    "signature."
+                )
+                return [Error(location.line, location.column, msg)]
+        return []
+
+
 class NBA205(Rule):
     """Guvectorize function shall return None."""
 
