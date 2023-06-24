@@ -30,6 +30,8 @@ class NBA206(Rule):
 
     @classmethod
     def check(cls, node: ast.FunctionDef) -> Sequence[Error]:
+        if not is_decorated_with("guvectorize", node):
+            return []
         if get_decorator_n_args(node, "args") != 2:
             return []
         signature, location = get_pos_arg_from_decorator(1, node)

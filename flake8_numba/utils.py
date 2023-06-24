@@ -13,9 +13,54 @@ class Location(NamedTuple):
     column: int = 0
 
 
+def get_decorator_location(
+    decorator_names: Union[Iterable[str], str], node: ast.FunctionDef
+) -> Optional[Location]:
+    """Get the location of a given decorator(s).
+
+    Args:
+        decorator_names (Union[Iterable[str], str]): Decorators to check.
+        node (ast.FunctionDef): Node representing the function definition.
+
+    Returns:
+        Optional[Location]: Location of the decorator. None if it could not be found for
+            the given names.
+    """
+    decorator_names_ = (
+        [decorator_names] if isinstance(decorator_names, str) else decorator_names
+    )
+    if node.decorator_list:
+        for decorator in node.decorator_list:
+            if isinstance(decorator, ast.Call):
+                name = (
+                    decorator.func.attr
+                    if isinstance(decorator.func, ast.Attribute)
+                    else decorator.func.id  # type: ignore
+                )
+            else:
+                name = (
+                    decorator.attr
+                    if isinstance(decorator, ast.Attribute)
+                    else decorator.id  # type: ignore
+                )
+            if name in decorator_names_:
+                return Location(decorator.lineno, decorator.col_offset)
+
+    return None
+
+
 def is_decorated_with(
     decorator_names: Union[Iterable[str], str], node: ast.FunctionDef
 ) -> bool:
+    """Check if a function is decorated with the given decorator names.
+
+    Args:
+        decorator_names (Union[Iterable[str], str]): Decorators to check.
+        node (ast.FunctionDef): Node representing the function definition.
+
+    Returns:
+        bool: `True` if any of the decorators could be found.
+    """
     decorator_names_ = (
         [decorator_names] if isinstance(decorator_names, str) else decorator_names
     )
@@ -35,6 +80,7 @@ def is_decorated_with(
                 )
             if name in decorator_names_:
                 return True
+
     return False
 
 

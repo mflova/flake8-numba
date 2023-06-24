@@ -1,0 +1,3 @@
+@vectorize("hello")
+def func(val: int) -> None:
+    ...
