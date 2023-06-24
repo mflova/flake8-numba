@@ -2,6 +2,7 @@ import ast
 
 import pytest
 
+from flake8_numba.rule import Error
 from flake8_numba.rules.nba2 import NBA203, NBA204, NBA205, NBA206, NBA207, NBA208
 
 
@@ -25,7 +26,9 @@ def test_nba203(file_name: str, expected_error: bool, node: ast.FunctionDef) -> 
         node (ast.FunctionDef): Node describing the function from the txt file and
             parsed by ast
     """
-    assert expected_error == bool(NBA203.check(node))
+    errors: list[Error] = []
+    NBA203().check(node, errors)
+    assert expected_error == bool(errors)
 
 
 @pytest.mark.parametrize(
@@ -48,7 +51,9 @@ def test_nba204(file_name: str, expected_error: bool, node: ast.FunctionDef) -> 
         node (ast.FunctionDef): Node describing the function from the txt file and
             parsed by ast
     """
-    assert expected_error == bool(NBA204.check(node))
+    errors: list[Error] = []
+    NBA204().check(node, errors)
+    assert expected_error == bool(errors)
 
 
 @pytest.mark.parametrize(
@@ -70,7 +75,9 @@ def test_nba205(file_name: str, expected_error: bool, node: ast.FunctionDef) -> 
         node (ast.FunctionDef): Node describing the function from the txt file and
             parsed by ast
     """
-    assert expected_error == bool(NBA205.check(node))
+    errors: list[Error] = []
+    NBA205().check(node, errors)
+    assert expected_error == bool(errors)
 
 
 @pytest.mark.parametrize(
@@ -94,7 +101,9 @@ def test_nba206(file_name: str, expected_error: bool, node: ast.FunctionDef) -> 
         node (ast.FunctionDef): Node describing the function from the txt file and
             parsed by ast
     """
-    assert expected_error == bool(NBA206.check(node))
+    errors: list[Error] = []
+    NBA206().check(node, errors)
+    assert expected_error == bool(errors)
 
 
 @pytest.mark.parametrize(
@@ -118,7 +127,9 @@ def test_nba207(file_name: str, expected_error: bool, node: ast.FunctionDef) -> 
         node (ast.FunctionDef): Node describing the function from the txt file and
             parsed by ast
     """
-    assert expected_error == bool(NBA207.check(node))
+    errors: list[Error] = []
+    NBA207().check(node, errors)
+    assert expected_error == bool(errors)
 
 
 @pytest.mark.parametrize(
@@ -142,4 +153,6 @@ def test_nba208(file_name: str, expected_error: bool, node: ast.FunctionDef) -> 
         node (ast.FunctionDef): Node describing the function from the txt file and
             parsed by ast
     """
-    assert expected_error == bool(NBA208.check(node))
+    errors: list[Error] = []
+    NBA208().check(node, errors)
+    assert expected_error == bool(errors)
