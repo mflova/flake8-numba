@@ -8,6 +8,7 @@ packages = [{include = "flake8_numba"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+numba = "*"
 
 [tool.poetry.plugins."flake8.extension"]
 NBA = 'flake8_numba.plugin:Plugin'
@@ -49,12 +50,13 @@ exclude = ".venv|data/"
 exclude = [".venv", "data"]
 python_version = "3.9"
 strict = true
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 norecursedirs = ".venv"
 testpaths = ["tests"]
 # Coverage is lowered down till there are rules implemented
-addopts = "--cov=flake8_numba --cov-report term-missing --cov-fail-under=90"
+addopts = "--cov=flake8_numba --cov-report term-missing --cov-fail-under=80"
 
 
 [tool.codespell]
