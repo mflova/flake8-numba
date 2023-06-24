@@ -4,6 +4,7 @@ from collections.abc import Sequence
 
 from flake8_numba.rule import Error, Rule
 from flake8_numba.utils import (
+    get_decorator_location,
     get_decorator_n_args,
     get_pos_arg_from_decorator,
     has_return_value,
@@ -42,4 +43,46 @@ class NBA206(Rule):
         if counter["("] != counter[")"]:
             msg = "NBA206: Parenthesis on second positional argument are broken."
             return [Error(location.line, location.column, msg)]
+        return []
+
+
+class NBA207(Rule):
+    """Second argument must define the sizes-related signature (string type)."""
+
+    @classmethod
+    def check(cls, node: ast.FunctionDef) -> Sequence[Error]:
+        if (
+            not is_decorated_with("guvectorize", node)
+            or get_decorator_n_args(node, "args") != 2
+        ):
+            return []
+        signature, location = get_pos_arg_from_decorator(1, node)
+        if signature is None:
+            return []
+
+        msg = (
+            "NBA206: A second signature (str type) must be provided with "
+            "corresponding sizes of inputs and outputs."
+        )
+        if not isinstance(signature, str):  # If numba based signature
+            return [Error(location.line, location.column, msg)]
+        counter = Counter(signature)
+        if counter["("] < 2 or counter[")"] < 2 or "->" not in signature:
+            return [Error(location.line, location.column, msg)]
+        return []
+
+
+class NBA208(Rule):
+    """Guvectorize needs two positional arguments."""
+
+    @classmethod
+    def check(cls, node: ast.FunctionDef) -> Sequence[Error]:
+        if is_decorated_with("guvectorize", node):
+            if get_decorator_n_args(node, "args") != 2:
+                location = get_decorator_location("guvectorize", node)
+                msg = (
+                    "NBA208: Guvectorize strictly needs two positional arguments: list "
+                    "of tuples and string"
+                )
+                return [Error(location.line, location.column, msg)]  # type: ignore
         return []
