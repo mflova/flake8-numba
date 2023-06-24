@@ -1,4 +1,5 @@
 from flake8_numba import utils
+from numba import float32
 import ast
 import pytest
 import os
@@ -182,6 +183,16 @@ class TestGetPosArgFromDecorator:
             ("data/get_pos_arg_from_decorator/func_with_two_pos_args", 1, "value2"),
             ("data/get_pos_arg_from_decorator/func_with_only_kwargs", 0, None),
             ("data/get_pos_arg_from_decorator/func_with_only_kwargs", 1, None),
+            (
+                "data/get_pos_arg_from_decorator/func_with_mixed_symbols",
+                0,
+                "[float32(float32, value3)]",
+            ),
+            (
+                "data/get_pos_arg_from_decorator/func_with_numba_types",
+                0,
+                [float32(float32, float32)],
+            ),
         ],
     )
     def test_get_n_args_decorator(
@@ -199,4 +210,4 @@ class TestGetPosArgFromDecorator:
             returned_value (Optional[object]): Expected returned value from the function.
             node (ast.FunctionDef): Node representing the function stored in `relative_path`
         """
-        assert returned_value == utils.get_pos_arg_from_decorator(at, node)
+        assert returned_value == utils.get_pos_arg_from_decorator(at, node)[0]

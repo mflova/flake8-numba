@@ -1,6 +1,9 @@
 import ast
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping, Sequence
+from functools import lru_cache
 from typing import Literal, NamedTuple, Optional, Union, overload
+
+import numba  # noqa: F401
 
 
 class Location(NamedTuple):
@@ -115,14 +118,78 @@ def get_decorator_n_args(node: ast.FunctionDef, arg_type: str = "") -> int:
     return args_count
 
 
-def get_pos_arg_from_decorator(at: int, node: ast.FunctionDef) -> Optional[str]:
+@lru_cache
+def _dct_custom_alias_to_standard_numba() -> Mapping[str, str]:
+    """Get a dictionary that can be used to parse from custom to standard numba types.
+
+    This is useful to detect cases such as `nb.float32` instead of `numba.float32`.
+
+    Returns:
+        Mapping[str, str]: Dictionary that links custom data type to "standard" numba
+            type.
+    """
+    _aliases: Sequence[tuple[set[str], str]] = [
+        ({"boolean", "bool_", "b1"}, "numba.boolean"),
+        ({"uint8", "byte", "u1"}, "numba.uint8"),
+        ({"uint16", "u2"}, "numba.uint16"),
+        ({"uint32", "u2"}, "numba.uint32"),
+        ({"uint64", "u4"}, "numba.uint64"),
+        ({"int8", "char", "i1"}, "numba.int8"),
+        ({"int16", "i2"}, "numba.int16"),
+        ({"int32", "i4"}, "numba.int32"),
+        ({"int64", "i8"}, "numba.int64"),
+        ({"intc"}, "numba.intc"),
+        ({"uintc"}, "numba.uintc"),
+        ({"intp"}, "numba.intp"),
+        ({"uintp"}, "numba.uintp"),
+        ({"float32", "f4"}, "numba.float32"),
+        ({"double", "f8", "float64"}, "numba.float64"),
+        ({"complex64", "c8"}, "numba.complex64"),
+        ({"complex128", "c16"}, "numba.complex128"),
+    ]
+
+    possible_prefix = ("nb.", "")
+
+    dct_aliases = {}
+    for alias_type in _aliases:
+        for alias in alias_type[0]:
+            for possible_prefix_ in possible_prefix:
+                dct_aliases[alias] = f"{possible_prefix_}{alias_type[1]}"
+    return dct_aliases
+
+
+def get_pos_arg_from_decorator(
+    at: int, node: ast.FunctionDef
+) -> tuple[Optional[object], Location]:
+    """Get the indicated positional argument.
+
+    Args:
+        at (int): Index of the positional argument
+        node (ast.FunctionDef): Node representing the function definition.
+
+    Returns:
+        tuple[Optional[object], Location]: Argument as an `object` if the code could
+            be evaluated (including `numba` library), string representation otherwise.
+    """
     if not node.decorator_list or not decorator_has_arguments(node):
-        return None
+        return None, Location()
 
     if at >= get_decorator_n_args(node, "args"):
-        return None
+        return None, Location()
 
-    try:
-        return ast.unparse(node.decorator_list[0].args[at])  # type: ignore
-    except ValueError:
-        return None
+    arg = node.decorator_list[0].args[at]  # type: ignore
+    location = Location(line=arg.lineno, column=arg.col_offset)
+    original_str = ast.unparse(arg)
+    custom_to_standard = _dct_custom_alias_to_standard_numba()
+    new_str = original_str
+    while True:
+        try:
+            return eval(new_str), location  # noqa: PGH
+        except NameError as name_error:
+            not_found_variable_name = name_error.args[0].split()[1].strip("'")
+            if not_found_variable_name in custom_to_standard:
+                new_str = new_str.replace(
+                    not_found_variable_name, custom_to_standard[not_found_variable_name]
+                )
+            else:
+                return original_str, location
