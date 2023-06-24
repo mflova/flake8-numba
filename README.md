@@ -2,9 +2,10 @@
 
 [WORK IN PROGRESS, ALPHA VERSION]
 
-Improve your Python development experience with `flake8-numba`. This plugin integrates
-with Flake8 to provide comprehensive code analysis for projects that make use of `numba`.
-Catch potential errors and enhance code quality effortlessly with `flake8-numba`.
+Improve your Python development experience with flake8-numba. This plugin integrates with Flake8 to provide
+comprehensive code analysis for projects that make use of numba. When working with numba, many errors are not
+discovered until the code is run. However, many of these issues can be perfectly caught by performing some basic
+syntactical analysis. This tool helps you catch potential errors and enhance code quality effortlessly.
 
 ## Installation
 
