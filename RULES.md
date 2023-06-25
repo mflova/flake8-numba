@@ -44,6 +44,29 @@ def f(x, y):
     return x + y, 2  # Error
 ```
 
+## NBA201
+
+Raised when the number of input/outputs in the first positional argument is not matching
+the number of input/outputs from second positional argument.
+
+```python
+# 3 values in 1st positional argument and 2 on the right side.
+@guvectorize([(float32, float32, float32)], "() -> ()")
+def func(...) -> None:
+    ...
+```
+
+## NBA202
+
+Raised when the sizes between the first and second positional arguments are not matching
+
+```python
+# 2nd argument is 1D at left but scalar on second positional argument
+@guvectorize([(float32, float32[:], float32)], "(), () -> ()")
+def func(...) -> None:
+    ...
+```
+
 ## NBA203
 
 For the second signature, all those symbols that appear on the right side and not on the

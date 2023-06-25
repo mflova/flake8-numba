@@ -1,8 +1,10 @@
 import ast
+import re
 from collections import Counter
-from typing import Optional, cast
+from typing import Any, Optional, cast
 
 from flake8_numba.rule import Error, Rule
+from flake8_numba.rules import nba0
 from flake8_numba.utils import (
     Location,
     get_decorator_location,
@@ -13,16 +15,72 @@ from flake8_numba.utils import (
 )
 
 
+class NBA201(Rule):
+    def _check(self, node: ast.FunctionDef) -> Optional[Error]:
+        first_arg, _ = get_pos_arg_from_decorator(0, node)
+        second_arg, location = get_pos_arg_from_decorator(1, node)
+        if not isinstance(second_arg, str) or not isinstance(first_arg, list):
+            return None
+        len_second_arg = Counter(second_arg)["("]
+
+        for idx, signature in enumerate(first_arg):
+            if len(signature) != len_second_arg:
+                msg = (
+                    f"NBA201: Number of inputs/outputs in {idx} signature is not "
+                    "matching the one provided in the second argument."
+                )
+                return Error(location.line, location.column, msg)
+        return None
+
+    @property
+    def depends_on(self) -> set[type[Rule]]:
+        return {nba0.NBA007, NBA203, NBA204}  # First two positional arguments are ok
+
+
+class NBA202(Rule):
+    def _check(self, node: ast.FunctionDef) -> Optional[Error]:
+        first_arg, _ = get_pos_arg_from_decorator(0, node)
+        first_arg = cast(list[tuple[Any, ...]], first_arg)
+        second_arg, location = get_pos_arg_from_decorator(1, node)
+        second_arg = cast(str, second_arg)
+
+        # Get sizes from second positional argument
+        pattern = r"\(((?:[a-zA-Z]+(?:,\s*[a-zA-Z]+)*)?)\)"
+        sizes_from_second_arg: list[int] = []
+        symbol: str
+        for match in re.findall(pattern, second_arg):
+            count = 0
+            for symbol in match:
+                if symbol.isalpha():
+                    count += 1
+            sizes_from_second_arg.append(count)
+
+        sizes_from_first_arg: list[int] = []
+        for signature in first_arg:
+            sizes_from_first_arg = []
+            for value in signature:
+                if hasattr(value, "ndim"):
+                    sizes_from_first_arg.append(value.ndim)
+                else:
+                    sizes_from_first_arg.append(0)
+            if sizes_from_first_arg != sizes_from_second_arg:
+                msg = (
+                    f"NBA202: Sizes between first signature ({sizes_from_first_arg}) "
+                    f"and second positional argument ({sizes_from_second_arg}) are "
+                    "not matching."
+                )
+                return Error(location.line, location.column, msg)
+        return None
+
+    @property
+    def depends_on(self) -> set[type[Rule]]:
+        return {nba0.NBA007, NBA203, NBA204}  # First two positional arguments are ok
+
+
 class NBA203(Rule):
     """Undefined symbol in second positional argument."""
 
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:
-        if not is_decorated_with("guvectorize", node):
-            return None
-
-        if get_decorator_n_args(node, "args") != 2:
-            return None
-
         signature, location = get_pos_arg_from_decorator(1, node)
         if not isinstance(signature, str):
             return None
@@ -41,19 +99,13 @@ class NBA203(Rule):
 
     @property
     def depends_on(self) -> set[type[Rule]]:
-        return {NBA206, NBA207}
+        return {NBA206, NBA207, NBA208}  # 2 args, no open parenthesis + second pos is str
 
 
 class NBA204(Rule):
     """Constants are not allowed in second positional argument."""
 
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:
-        if not is_decorated_with("guvectorize", node):
-            return None
-
-        if get_decorator_n_args(node, "args") != 2:
-            return None
-
         signature, location = get_pos_arg_from_decorator(1, node)
         if not isinstance(signature, str):
             return None
@@ -72,7 +124,7 @@ class NBA204(Rule):
 
     @property
     def depends_on(self) -> set[type[Rule]]:
-        return {NBA206, NBA207}
+        return {NBA206, NBA207, NBA208}  # 2 args, no open parenthesis + second pos is str
 
 
 class NBA205(Rule):
