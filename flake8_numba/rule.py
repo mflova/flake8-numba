@@ -1,9 +1,7 @@
 """Module that implement the logic that all rules will follow."""
 import ast
 from abc import ABC, abstractmethod
-from typing import NamedTuple
-
-from collections.abc import Sequence
+from typing import NamedTuple, Optional, final
 
 
 class Error(NamedTuple):
@@ -20,15 +18,40 @@ class Error(NamedTuple):
 class Rule(ABC):
     """Skeleton that all rules have to meet."""
 
-    @classmethod
+    @final
+    def check(self, node: ast.FunctionDef, errors: list[Error]) -> bool:
+        """Check if the current rule is found to be broken within node.
+
+        Returns `True` if no error. `False` if it was ok.
+
+        Args:
+            node (ast.FunctionDef): Node describing the function definition.
+            errors (list[Error]): Current list of errors founds. If new errors are found,
+                they will be added to this list.
+        """
+        if errors is None:
+            errors = []
+        error = self._check(node)
+        if error:
+            errors.append(error)
+        return bool(error)
+
     @abstractmethod
-    def check(cls, node: ast.FunctionDef) -> Sequence[Error]:
+    def _check(self, node: ast.FunctionDef) -> Optional[Error]:
         """Given a node, find any possible issues.
 
         Args:
             node (ast.FunctionDef): Node that represents a small piece code.
-
-        Returns:
-            Sequence[Error]: Errors found. Empty if there were none.
         """
         ...
+
+    @property
+    def depends_on(self) -> set[type["Rule"]]:
+        """Check will be automatically skip if these errors were triggered first.
+
+        Meant to be overridden to add more rules.
+
+        Returns:
+             set[type[Rule], ...]: Tuple with all codes.
+        """
+        return set()
