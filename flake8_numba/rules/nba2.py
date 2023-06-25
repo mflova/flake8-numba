@@ -16,6 +16,8 @@ from flake8_numba.utils import (
 
 
 class NBA201(Rule):
+    """Non matching number of inputs/outputs between both positional arguments."""
+
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:
         first_arg, _ = get_pos_arg_from_decorator(0, node)
         second_arg, location = get_pos_arg_from_decorator(1, node)
@@ -38,17 +40,18 @@ class NBA201(Rule):
 
 
 class NBA202(Rule):
+    """Non matching sizes of inputs/outputs between both positional arguments."""
+
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:
         first_arg, _ = get_pos_arg_from_decorator(0, node)
         first_arg = cast(list[tuple[Any, ...]], first_arg)
         second_arg, location = get_pos_arg_from_decorator(1, node)
-        second_arg = cast(str, second_arg)
 
         # Get sizes from second positional argument
         pattern = r"\(((?:[a-zA-Z]+(?:,\s*[a-zA-Z]+)*)?)\)"
         sizes_from_second_arg: list[int] = []
         symbol: str
-        if second_arg is None:
+        if second_arg is None or not isinstance(second_arg, str):
             return None
         for match in re.findall(pattern, second_arg):
             count = 0
@@ -221,3 +224,38 @@ class NBA208(Rule):
     @property
     def depends_on(self) -> set[type[Rule]]:
         return {nba0.NBA007}
+
+
+class NBA211(Rule):
+    """Arrays in second pos argument must be separated by commas."""
+
+    def _check(self, node: ast.FunctionDef) -> Optional[Error]:
+        second_arg, location = get_pos_arg_from_decorator(1, node)
+        if not isinstance(second_arg, str):
+            return None
+
+        closing_detected = False
+        arrow_detected = False
+        comma_detected = False
+        for char in second_arg:
+            if char == ")":
+                closing_detected = True
+            elif char == ",":
+                comma_detected = True
+            elif char == "-":
+                arrow_detected = True
+            elif char == "(":
+                if closing_detected and not comma_detected and not arrow_detected:
+                    msg = (
+                        "NBA211: Arrays on second positional argument must be separated "
+                        "by commas."
+                    )
+                    return Error(location.line, location.column, msg)
+                closing_detected = False
+                comma_detected = False
+                arrow_detected = False
+        return None
+
+    @property
+    def depends_on(self) -> set[type[Rule]]:
+        return {nba0.NBA007, NBA203, NBA204}  # First two positional arguments are ok

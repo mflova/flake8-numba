@@ -156,3 +156,15 @@ def g(x, y, res):
         res[i] = x[i] + y
     return res  # Error
 ```
+
+## NBA211
+
+Raised when the second signature from `@guvectorize` is not suing commas to separate arrays:
+
+```python
+@guvectorize([(int64[:], int64, int64[:])], '(n)()->(n)')  # Error
+def g(x, y, res):
+    for i in range(x.shape[0]):
+        res[i] = x[i] + y
+    return res  # Error
+```
