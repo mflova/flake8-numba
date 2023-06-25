@@ -34,7 +34,8 @@ class Rule(ABC):
         error = self._check(node)
         if error:
             errors.append(error)
-        return bool(error)
+            return False
+        return True
 
     @abstractmethod
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:

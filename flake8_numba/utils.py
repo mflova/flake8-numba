@@ -233,7 +233,9 @@ def get_pos_arg_from_decorator(
             return eval(new_str), location  # noqa: PGH
         except NameError as name_error:
             not_found_variable_name = name_error.args[0].split()[1].strip("'")
-            if not_found_variable_name in custom_to_standard:
+            if not_found_variable_name == "nb":
+                new_str = new_str.replace("nb.", "")
+            elif not_found_variable_name in custom_to_standard:
                 new_str = new_str.replace(
                     not_found_variable_name, custom_to_standard[not_found_variable_name]
                 )

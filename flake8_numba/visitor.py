@@ -57,6 +57,7 @@ class Visitor(ast.NodeVisitor):
         if rule in self.pending_rules:
             # Skip if the rule that depends on was already raised.
             if self.rules_raised & rule.depends_on:
+                self.pending_rules.remove(rule)
                 return
             # Rules are appended internally within .check
             is_ok = rule.check(node, self.errors)

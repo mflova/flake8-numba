@@ -58,7 +58,6 @@ testpaths = ["tests"]
 # Coverage is lowered down till there are rules implemented
 addopts = "--cov=flake8_numba --cov-report term-missing --cov-fail-under=80"
 
-
 [tool.codespell]
 skip = '.venv'
 
