@@ -21,10 +21,10 @@ class NBA006(Rule):
         if parameters:
             first_parameter = parameters[0]
             first_variable_name = first_parameter.arg
-        if first_variable_name in ("cls", "self"):
-            msg = "NBA206: Cannot use this decorator in bound methods."
-            location = get_decorator_location(["vectorize", "guvectorize"], node)
-            return Error(location.line, location.column, msg)  # type: ignore
+            if first_variable_name in ("cls", "self"):
+                msg = "NBA206: Cannot use this decorator in bound methods."
+                location = get_decorator_location(["vectorize", "guvectorize"], node)
+                return Error(location.line, location.column, msg)  # type: ignore
 
         return None
 
