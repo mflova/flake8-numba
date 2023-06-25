@@ -16,7 +16,9 @@ from flake8_numba.rules.nba0 import NBA006, NBA007
         ("nba0/guvec_with_matching_signatures", False),
     ],
 )
-def test_nba006(file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]) -> None:
+def test_nba006(
+    file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]
+) -> None:
     """Test that the rule returns the expected outputs for different functions."""
     NBA006().check(node, errors)
     assert expected_error == bool(errors)

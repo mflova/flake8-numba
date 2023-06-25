@@ -23,7 +23,9 @@ from flake8_numba.rules.nba2 import (
         ("nba2/guvec_with_missmatching_signatures2", True),
     ],
 )
-def test_nba201(file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]) -> None:
+def test_nba201(
+    file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]
+) -> None:
     """Test that the rule returns the expected outputs for different functions."""
     NBA201().check(node, errors)
     assert expected_error == bool(errors)
@@ -36,7 +38,9 @@ def test_nba201(file_name: str, expected_error: bool, node: ast.FunctionDef, err
         ("nba2/guvec_with_missmatching_signatures3", True),
     ],
 )
-def test_nba202(file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]) -> None:
+def test_nba202(
+    file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]
+) -> None:
     """Test that the rule returns the expected outputs for different functions."""
     NBA202().check(node, errors)
     assert expected_error == bool(errors)
@@ -52,7 +56,9 @@ def test_nba202(file_name: str, expected_error: bool, node: ast.FunctionDef, err
         ("nba2/func", False),
     ],
 )
-def test_nba203(file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]) -> None:
+def test_nba203(
+    file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]
+) -> None:
     """Test that the rule returns the expected outputs for different functions."""
     NBA203().check(node, errors)
     assert expected_error == bool(errors)
@@ -68,7 +74,9 @@ def test_nba203(file_name: str, expected_error: bool, node: ast.FunctionDef, err
         ("nba2/func", False),
     ],
 )
-def test_nba204(file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]) -> None:
+def test_nba204(
+    file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]
+) -> None:
     """Test that the rule returns the expected outputs for different functions."""
     NBA204().check(node, errors)
     assert expected_error == bool(errors)
@@ -83,7 +91,9 @@ def test_nba204(file_name: str, expected_error: bool, node: ast.FunctionDef, err
         ("nba2/func", False),
     ],
 )
-def test_nba205(file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]) -> None:
+def test_nba205(
+    file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]
+) -> None:
     """Test that the rule returns the expected outputs for different functions."""
     NBA205().check(node, errors)
     assert expected_error == bool(errors)
@@ -100,7 +110,9 @@ def test_nba205(file_name: str, expected_error: bool, node: ast.FunctionDef, err
         ("nba2/guvec_with_second_arg_wrong_type", False),
     ],
 )
-def test_nba206(file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]) -> None:
+def test_nba206(
+    file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]
+) -> None:
     """Test that the rule returns the expected outputs for different functions."""
     NBA206().check(node, errors)
     assert expected_error == bool(errors)
@@ -117,7 +129,9 @@ def test_nba206(file_name: str, expected_error: bool, node: ast.FunctionDef, err
         ("nba2/guvec_with_two_pos_args", False),
     ],
 )
-def test_nba207(file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]) -> None:
+def test_nba207(
+    file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]
+) -> None:
     """Test that the rule returns the expected outputs for different functions."""
     NBA207().check(node, errors)
     assert expected_error == bool(errors)
@@ -134,7 +148,9 @@ def test_nba207(file_name: str, expected_error: bool, node: ast.FunctionDef, err
         ("nba2/guvec_with_second_arg_wrong_type", True),
     ],
 )
-def test_nba208(file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]) -> None:
+def test_nba208(
+    file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]
+) -> None:
     """Test that the rule returns the expected outputs for different functions."""
     NBA208().check(node, errors)
     assert expected_error == bool(errors)
