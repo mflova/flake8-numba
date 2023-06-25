@@ -241,3 +241,5 @@ def get_pos_arg_from_decorator(
                 )
             else:
                 return original_str, location
+        except Exception:  # noqa: BLE001
+            return None, Location()
