@@ -22,7 +22,7 @@ class NBA006(Rule):
             first_parameter = parameters[0]
             first_variable_name = first_parameter.arg
             if first_variable_name in ("cls", "self"):
-                msg = "NBA206: Cannot use this decorator in bound methods."
+                msg = "NBA006: Cannot use this decorator in bound methods."
                 location = get_decorator_location(["vectorize", "guvectorize"], node)
                 return Error(location.line, location.column, msg)  # type: ignore
 
@@ -42,8 +42,8 @@ class NBA007(Rule):
         first_arg, location = get_pos_arg_from_decorator(0, node)
         if is_decorated_with("guvectorize", node):
             msg = (
-                "NBA007: Expected a list of tuples. Each one containing a valid "
-                "signature of the type `(*input_types, *rtypes)`."
+                "NBA007: Expected a list of tuples for first positional argument. Each"
+                " one containing a valid signature of the type `(*input_types, *rtypes)`."
             )
             if not isinstance(first_arg, list):
                 return Error(location.line, location.column, msg)
@@ -53,7 +53,7 @@ class NBA007(Rule):
             return None
         if is_decorated_with("vectorize", node):
             msg = (
-                "NBA207: Expected a list with each element being `rtype(*input_types)` "
+                "NBA007: Expected a list with each element being `rtype(*input_types)` "
                 "with numba types."
             )
             if not isinstance(first_arg, list):

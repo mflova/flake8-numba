@@ -26,7 +26,7 @@ class NBA201(Rule):
         for idx, signature in enumerate(first_arg):
             if len(signature) != len_second_arg:
                 msg = (
-                    f"NBA201: Number of inputs/outputs in {idx} signature is not "
+                    f"NBA201: Number of inputs/outputs in first signature ({idx}) is not "
                     "matching the one provided in the second argument."
                 )
                 return Error(location.line, location.column, msg)
@@ -48,6 +48,8 @@ class NBA202(Rule):
         pattern = r"\(((?:[a-zA-Z]+(?:,\s*[a-zA-Z]+)*)?)\)"
         sizes_from_second_arg: list[int] = []
         symbol: str
+        if second_arg is None:
+            return None
         for match in re.findall(pattern, second_arg):
             count = 0
             for symbol in match:
@@ -74,7 +76,7 @@ class NBA202(Rule):
 
     @property
     def depends_on(self) -> set[type[Rule]]:
-        return {nba0.NBA007, NBA203, NBA204}  # First two positional arguments are ok
+        return {NBA201}  # First two positional arguments are ok
 
 
 class NBA203(Rule):
@@ -157,6 +159,10 @@ class NBA206(Rule):
             return Error(location.line, location.column, msg)
         return None
 
+    @property
+    def depends_on(self) -> set[type[Rule]]:
+        return {nba0.NBA007}
+
 
 class NBA207(Rule):
     """Second argument must define the sizes-related signature (string type)."""
@@ -172,7 +178,7 @@ class NBA207(Rule):
             return None
 
         msg = (
-            "NBA206: A second signature (str type) must be provided with "
+            "NBA207: A second signature (str type) must be provided with "
             "corresponding sizes of inputs and outputs."
         )
         if not isinstance(signature, str):  # If numba based signature
@@ -184,7 +190,7 @@ class NBA207(Rule):
 
     @property
     def depends_on(self) -> set[type[Rule]]:
-        return {NBA208}
+        return {NBA208, nba0.NBA007}
 
 
 class NBA208(Rule):
@@ -211,3 +217,7 @@ class NBA208(Rule):
                 return None
             return Error(location.line, location.column, msg)
         return None
+
+    @property
+    def depends_on(self) -> set[type[Rule]]:
+        return {nba0.NBA007}
