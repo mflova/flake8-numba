@@ -3,7 +3,25 @@ import ast
 import pytest
 
 from flake8_numba.rule import Error
-from flake8_numba.rules.nba0 import NBA005, NBA006, NBA007
+from flake8_numba.rules.nba0 import NBA001, NBA005, NBA006, NBA007
+
+
+@pytest.mark.parametrize(
+    "file_name, expected_error",
+    [
+        ("nba0/func", False),
+        ("nba0/guvec_with_different_size_signatures", True),
+        ("nba0/vec_with_different_size_signatures", True),
+        ("nba0/guvec_with_matching_signatures", False),
+        ("nba0/vec_with_matching_signatures", False),
+    ],
+)
+def test_nba001(
+    file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]
+) -> None:
+    """Test that the rule returns the expected outputs for different functions."""
+    NBA001().check(node, errors)
+    assert expected_error == bool(errors)
 
 
 @pytest.mark.parametrize(
