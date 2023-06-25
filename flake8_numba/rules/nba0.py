@@ -42,7 +42,7 @@ class NBA007(Rule):
         first_arg, location = get_pos_arg_from_decorator(0, node)
         if is_decorated_with("guvectorize", node):
             msg = (
-                "NBA207: Expected a list of tuples. Each one containing a valid "
+                "NBA007: Expected a list of tuples. Each one containing a valid "
                 "signature of the type `(*input_types, *rtypes)`."
             )
             if not isinstance(first_arg, list):

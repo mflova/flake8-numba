@@ -39,6 +39,10 @@ class NBA203(Rule):
 
         return None
 
+    @property
+    def depends_on(self) -> set[type[Rule]]:
+        return {NBA206, NBA207}
+
 
 class NBA204(Rule):
     """Constants are not allowed in second positional argument."""
@@ -65,6 +69,10 @@ class NBA204(Rule):
                 )
                 return Error(location.line, location.column, msg)
         return None
+
+    @property
+    def depends_on(self) -> set[type[Rule]]:
+        return {NBA206, NBA207}
 
 
 class NBA205(Rule):
@@ -121,6 +129,10 @@ class NBA207(Rule):
         if counter["("] < 2 or counter[")"] < 2 or "->" not in signature:
             return Error(location.line, location.column, msg)
         return None
+
+    @property
+    def depends_on(self) -> set[type[Rule]]:
+        return {NBA208}
 
 
 class NBA208(Rule):

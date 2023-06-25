@@ -7,27 +7,25 @@ import ast
 import inspect
 from collections.abc import Sequence
 from functools import lru_cache
-from typing import Final
+from typing import Any
 
 from flake8_numba.rule import Error, Rule
 from flake8_numba.rules import nba0, nba1, nba2
 
-_PREFIX: Final = "NBA"
-"""Prefix used for defining all rules."""
-
 
 @lru_cache
-def _all_function_def_based_rules() -> Sequence[type[Rule]]:
-    members = []
+def _all_rules() -> Sequence[Rule]:
+    class_list = []
+    members: list[Any] = []
     members.extend(inspect.getmembers(nba0))
     members.extend(inspect.getmembers(nba1))
     members.extend(inspect.getmembers(nba2))
-    all_rules = [
-        elem[1]
-        for elem in members
-        if inspect.isclass(elem[1]) and _PREFIX in elem[1].__name__
-    ]
-    return sorted(all_rules, key=lambda obj: obj.__name__)
+    # Obtener todos los miembros del módulo
+    for _, obj in members:
+        # Verificar si el miembro es una clase
+        if inspect.isclass(obj) and issubclass(obj, Rule) and obj != Rule:
+            class_list.append(obj())
+    return class_list
 
 
 class Visitor(ast.NodeVisitor):
@@ -36,6 +34,8 @@ class Visitor(ast.NodeVisitor):
     def __init__(self) -> None:
         """Insantiate a list of empty errors just after being declared."""
         self.errors: list[Error] = []
+        self.pending_rules: set[Rule] = set(_all_rules())
+        self.rules_raised: set[type[Rule]] = set()
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: N802
         """Called whenever a function definition is found.
@@ -44,7 +44,22 @@ class Visitor(ast.NodeVisitor):
             node (ast.FunctionDef): Node containing all the information relative to
                 the function definition.
         """
-        for rule in _all_function_def_based_rules():
-            print(rule)
-            rule().check(node, self.errors)
+        for rule in _all_rules():
+            self.process_rule(rule, node)
         self.generic_visit(node)
+
+    def process_rule(self, rule: Rule, node: ast.FunctionDef) -> None:
+        # Process dependencies
+        if rule.depends_on:
+            for pre_rule in rule.depends_on:
+                self.process_rule(pre_rule(), node)
+        # Process rules with dependencies solved
+        if rule in self.pending_rules:
+            # Skip if the rule that depends on was already raised.
+            if self.rules_raised & rule.depends_on:
+                return
+            # Rules are appended internally within .check
+            is_ok = rule.check(node, self.errors)
+            if not is_ok:
+                self.rules_raised.add(type(rule))
+            self.pending_rules.remove(rule)
