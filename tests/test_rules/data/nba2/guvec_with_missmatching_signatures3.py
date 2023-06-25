@@ -1,0 +1,3 @@
+@guvectorize([(float32, float32[:], float32)], "(n, m), () -> ()")
+def func(val: int) -> None:
+    ...
