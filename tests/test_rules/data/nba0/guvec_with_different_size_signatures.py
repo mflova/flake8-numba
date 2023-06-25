@@ -1,0 +1,3 @@
+@vectorize([(float64, float64, float64), (float32, float32)], "(n) -> ()")
+def func(val: float) -> int:
+    ...
