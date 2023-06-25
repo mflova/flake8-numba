@@ -2,6 +2,27 @@
 
 Current supported rules how to fix some of them can be seen below.
 
+## NBA001
+
+Raised when first positional argument has different inputs/outputs for the different
+signatures provided.
+
+```python
+@vectorize([float64(float64, float64), (int64(int64))])  # ERROR
+def f(...):
+    ...
+```
+
+## NBA005
+
+Raised when the first positional argument is not matching the function signature.
+
+```python
+@guvectorize([(float32, float32)], "() -> ()")
+def func(val: float) -> int:  # ERROR (only one value)
+    ...
+```
+
 ## NBA006
 
 Do not use `@vectorize` or `@guvectorize` for bound methods:
