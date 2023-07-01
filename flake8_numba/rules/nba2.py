@@ -226,6 +226,49 @@ class NBA208(Rule):
         return {nba0.NBA007}
 
 
+class NBA209(Rule):
+    """Output value is not assigned with guvectorize."""
+
+    def _check(self, node: ast.FunctionDef) -> Optional[Error]:
+        str_signature, location = get_pos_arg_from_decorator(1, node)
+        if not isinstance(str_signature, str):
+            return None
+
+        parts = str_signature.split("->")
+        right_of_arrow = parts[1].strip()
+        n_outputs = Counter(right_of_arrow)["("]
+
+        # Get the function body
+        func_body = node.body
+
+        # Get the names of the last N positional arguments of the function
+        outputs_to_be_modified = {
+            arg.arg for arg in node.args.args[-n_outputs:] if arg.annotation is None
+        }
+
+        # Traverse each node in the function body
+        for sub_node in func_body:
+            # If it is an assignment and the target is a name argument
+            if isinstance(sub_node, ast.Assign) and isinstance(
+                sub_node.targets[0], ast.Subscript
+            ):
+                value = sub_node.targets[0].value
+                if isinstance(value, ast.Name) and value.id in outputs_to_be_modified:
+                    outputs_to_be_modified.remove(value.id)
+
+        if outputs_to_be_modified:
+            msg = (
+                "NBA209: Not all output variables are assigned "
+                f"{list(outputs_to_be_modified)}"
+            )
+            return Error(location.line, location.column, message=msg)
+        return None
+
+    @property
+    def depends_on(self) -> set[type[Rule]]:
+        return {NBA201, NBA202, NBA203, NBA204, NBA205, nba0.NBA005}
+
+
 class NBA211(Rule):
     """Arrays in second pos argument must be separated by commas."""
 
