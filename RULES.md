@@ -178,6 +178,32 @@ def g(x, y, res):
     return res  # Error
 ```
 
+## NBA209
+
+According to the second positional argument, the number of outputs for `guvectorize` can
+be deduced. Name of the output variables are read from the function signature. If these
+members are not modified, this rule will raise a warning:
+
+```python
+@guvectorize([(float32[:], float32[:]), (int64[:], int64[:])], "(n) -> (n)")
+def func(val, output) -> None:  # ERROR: Output is being reassigned but not modified
+    output = 1
+```
+
+```python
+@guvectorize([(float32[:], float32[:]), (int64[:], int64[:])], "(n) -> (n)")
+def func(val, output) -> None:  # ERROR: Output not being modified
+    val2[0] = val[0] + 2
+```
+
+Possible solution:
+
+```python
+@guvectorize([(float32[:], float32[:]), (int64[:], int64[:])], "(n) -> (n)")
+def func(val, output) -> None:  # ERROR: Output is being reassigned but not modified
+    output[0] = 1
+```
+
 ## NBA211
 
 Raised when the second signature from `@guvectorize` is not suing commas to separate arrays:

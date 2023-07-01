@@ -12,6 +12,7 @@ from flake8_numba.rules.nba2 import (
     NBA206,
     NBA207,
     NBA208,
+    NBA209,
     NBA211,
 )
 
@@ -154,6 +155,21 @@ def test_nba208(
 ) -> None:
     """Test that the rule returns the expected outputs for different functions."""
     NBA208().check(node, errors)
+    assert expected_error == bool(errors)
+
+
+@pytest.mark.parametrize(
+    "file_name, expected_error",
+    [
+        ("nba2/guvec_not_assigned_output", True),
+        ("nba2/guvec_with_assigned_output", False),
+    ],
+)
+def test_nba209(
+    file_name: str, expected_error: bool, node: ast.FunctionDef, errors: list[Error]
+) -> None:
+    """Test that the rule returns the expected outputs for different functions."""
+    NBA209().check(node, errors)
     assert expected_error == bool(errors)
 
 
