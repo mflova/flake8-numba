@@ -302,3 +302,40 @@ class NBA211(Rule):
     @property
     def depends_on(self) -> set[type[Rule]]:
         return {nba0.NBA007, NBA203, NBA204}  # First two positional arguments are ok
+
+
+class NBA212(Rule):
+    """Do not assign en input variables."""
+
+    def _check(self, node: ast.FunctionDef) -> Optional[Error]:
+        str_signature, location = get_pos_arg_from_decorator(1, node)
+        if not isinstance(str_signature, str):
+            return None
+
+        parts = str_signature.split("->")
+        right_of_arrow = parts[0].strip()
+        n_inputs = Counter(right_of_arrow)["("]
+
+        # Get the function body
+        func_body = node.body
+
+        # Get the names of the first N positional arguments of the function
+        input_names = {
+            arg.arg for arg in node.args.args[:n_inputs] if arg.annotation is None
+        }
+
+        # Traverse each node in the function body
+        for sub_node in func_body:
+            # If it is an assignment and the target is a name argument
+            if isinstance(sub_node, ast.Assign):
+                targets = sub_node.targets
+                if isinstance(targets[0], ast.Name) and targets[0].id in input_names:
+                    msg = f"NBA212: Do not modify input value: {targets[0].id}"
+                    return Error(location.line, location.column, message=msg)
+                if isinstance(targets[0], ast.Subscript) and isinstance(
+                    targets[0].value, ast.Name
+                ):
+                    if targets[0].value.id in input_names:
+                        msg = f"NBA212: Do not modify input value: {targets[0].value.id}"
+                        return Error(location.line, location.column, message=msg)
+        return None

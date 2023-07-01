@@ -2,6 +2,7 @@ import ast
 import os
 import re
 from collections.abc import Generator
+from typing import Any
 
 import pytest
 
@@ -40,3 +41,15 @@ def errors(request: pytest.FixtureRequest) -> Generator[list[Error], None, None]
             f"{error.message[:6].lower()}. Ensure code is OK."
         )
         assert error.message.lower().startswith(check_name_str), msg
+
+
+@pytest.fixture(autouse=True)
+def _test_no_print_statements(
+    capsys: pytest.CaptureFixture[Any],
+) -> Generator[None, None, None]:
+    """Verify that no print statements were added in any of these tests."""
+    yield
+    captured = capsys.readouterr()
+    msg = "Print statements were detected for the checks."
+    assert not captured.out, msg
+    assert not captured.err, msg
