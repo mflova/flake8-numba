@@ -215,3 +215,15 @@ def g(x, y, res):
         res[i] = x[i] + y
     return res  # Error
 ```
+
+## NBA212
+
+Raised when any of the input arguments is modified. `falke8-numba` checks for the input
+variables from the string based signature. Then it gets the name from the function
+signature and verifies none of the inputs are modified.
+
+```python
+@guvectorize([(float32[:], float32[:]), (int64[:], int64[:])], "(n) -> (n)")
+def func(val, output) -> None: 
+    val = 2  # ERROR: Output is being reassigned but not modified
+```
