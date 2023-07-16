@@ -230,7 +230,7 @@ def get_pos_arg_from_decorator(
     new_str = original_str
     while True:
         try:
-            return eval(new_str), location  # noqa: PGH
+            return eval(new_str), location  # noqa: PGH001
         except NameError as name_error:
             not_found_variable_name = name_error.args[0].split()[1].strip("'")
             if not_found_variable_name == "nb":
