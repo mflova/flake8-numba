@@ -65,7 +65,7 @@ skip = '.venv'
 line-length = 90
 target-version = "py39"
 exclude = [".venv", "data"]
-select = ["F", "E", "I", "N", "D", "UP", "YTT", "ASYNC", "BLE", "B", "A", "C4", "DTZ", "T10", "DJ", "EXE", "FA", "ISC", "ICN", "G", "PIE", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SIM", "TID", "INT", "ARG", "TD", "FIX", "PD", "PGH", "PL", "FLY", "NPY", "AIR", "RUF"]
+select = ["F", "E", "I", "N", "D", "UP", "YTT", "ASYNC", "BLE", "B", "A", "C4", "DTZ", "T10", "DJ", "EXE", "ISC", "ICN", "G", "PIE", "PYI", "PT", "Q", "RSE", "RET", "SLF", "SIM", "TID", "INT", "ARG", "TD", "FIX", "PD", "PGH", "PL", "FLY", "NPY", "AIR", "RUF"]
 ignore = ["SIM102", "EM101", "PLR", "D100", "D103", "C419", "PGH003", "RUF001", "PD901", "C405", "PLC1901", "UP015", "PLC0414", "I001", "D104", "D102", "PT006", "D101"]
 
 [tool.ruff.pydocstyle]
