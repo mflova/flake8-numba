@@ -1,7 +1,7 @@
 """Module that implement the logic that all rules will follow."""
 import ast
 from abc import ABC, abstractmethod
-from typing import NamedTuple, Optional, final
+from typing import NamedTuple, Optional, final, ClassVar
 
 
 class Error(NamedTuple):
@@ -17,6 +17,9 @@ class Error(NamedTuple):
 
 class Rule(ABC):
     """Skeleton that all rules have to meet."""
+
+    all_rules: ClassVar[list["Rule"]] = []
+    """List of all rules implemented so far."""
 
     @final
     def check(self, node: ast.FunctionDef, errors: list[Error]) -> bool:
@@ -56,3 +59,9 @@ class Rule(ABC):
              set[type[Rule], ...]: Tuple with all codes.
         """
         return set()
+
+    def __init_subclass__(cls, **kwargs: object):
+        """Populate `all_rules` variable with all subclasses."""
+        print("INSIDE")
+        super().__init_subclass__(**kwargs)
+        cls.all_rules.append(cls())

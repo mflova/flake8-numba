@@ -4,28 +4,9 @@ This logic is in charge of executing specific code whenever some specific nodes 
 the code are detected.
 """
 import ast
-import inspect
-from collections.abc import Sequence
-from functools import lru_cache
-from typing import Any
 
 from flake8_numba.rule import Error, Rule
-from flake8_numba.rules import nba0, nba1, nba2
-
-
-@lru_cache
-def _all_rules() -> Sequence[Rule]:
-    class_list = []
-    members: list[Any] = []
-    members.extend(inspect.getmembers(nba0))
-    members.extend(inspect.getmembers(nba1))
-    members.extend(inspect.getmembers(nba2))
-    # Obtener todos los miembros del módulo
-    for _, obj in members:
-        # Verificar si el miembro es una clase
-        if inspect.isclass(obj) and issubclass(obj, Rule) and obj != Rule:
-            class_list.append(obj())
-    return class_list
+from flake8_numba.rules import nba0, nba1, nba2  # Used by init_subclass  # noqa: F401
 
 
 class Visitor(ast.NodeVisitor):
@@ -34,7 +15,7 @@ class Visitor(ast.NodeVisitor):
     def __init__(self) -> None:
         """Insantiate a list of empty errors just after being declared."""
         self.errors: list[Error] = []
-        self.pending_rules: set[Rule] = set(_all_rules())
+        self.pending_rules: set[Rule] = set(Rule.all_rules)
         self.rules_raised: set[type[Rule]] = set()
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:  # noqa: N802
@@ -44,7 +25,7 @@ class Visitor(ast.NodeVisitor):
             node (ast.FunctionDef): Node containing all the information relative to
                 the function definition.
         """
-        for rule in _all_rules():
+        for rule in Rule.all_rules:
             self.process_rule(rule, node)
         self.generic_visit(node)
 
