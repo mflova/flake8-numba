@@ -1,7 +1,7 @@
 """Module that implement the logic that all rules will follow."""
 import ast
 from abc import ABC, abstractmethod
-from typing import NamedTuple, Optional, final, ClassVar
+from typing import ClassVar, NamedTuple, Optional, final
 
 
 class Error(NamedTuple):
@@ -62,6 +62,5 @@ class Rule(ABC):
 
     def __init_subclass__(cls, **kwargs: object):
         """Populate `all_rules` variable with all subclasses."""
-        print("INSIDE")
         super().__init_subclass__(**kwargs)
         cls.all_rules.append(cls())
