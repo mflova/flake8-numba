@@ -28,7 +28,7 @@ def f(x, y):
 or:
 
 ```python
-# ERROR: Dimensions missmatch (second argument at left is an array but an scalar at right)
+# ERROR: Dimensions mismatch (second argument at left is an array but an scalar at right)
 @guvectorize([(float32, float32[:], float32)], "(), () -> ()")
 def func(...) -> None:
     ...
