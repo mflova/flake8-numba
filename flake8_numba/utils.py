@@ -38,7 +38,11 @@ def get_decorator_location(
                     else decorator.func.id  # type: ignore
                 )
             else:
-                name = decorator.attr if isinstance(decorator, ast.Attribute) else decorator.id  # noqa: E501 # type: ignore
+                name = (
+                    decorator.attr
+                    if isinstance(decorator, ast.Attribute)
+                    else decorator.id  # type: ignore
+                )
             if name in decorator_names_:
                 return Location(decorator.lineno, decorator.col_offset)
 
@@ -69,7 +73,11 @@ def is_decorated_with(
                     else decorator.func.id  # type: ignore
                 )
             else:
-                name = decorator.attr if isinstance(decorator, ast.Attribute) else decorator.id # noqa: E501  # type: ignore
+                name = (
+                    decorator.attr
+                    if isinstance(decorator, ast.Attribute)
+                    else decorator.id  # type: ignore
+                )
             if name in decorator_names_:
                 return True
 
