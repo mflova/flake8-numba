@@ -65,6 +65,16 @@ def f(x, y):
     return x + y, 2  # Error
 ```
 
+## NBA102
+
+Functions decorated with `@vectorize` must have a returned value.
+
+```python
+@vectorize([float64(float64, float64)])
+def f(x, y):
+    x + y  # Error
+```
+
 ## NBA201
 
 Raised when the number of input/outputs in the first positional argument is not matching

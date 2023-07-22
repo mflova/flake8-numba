@@ -5,8 +5,7 @@ the code are detected.
 """
 import ast
 
-from flake8_numba.rule import Error, Rule
-from flake8_numba.rules import nba0, nba1, nba2  # Used by init_subclass  # noqa: F401
+from flake8_numba import Error, Rule
 
 
 class Visitor(ast.NodeVisitor):

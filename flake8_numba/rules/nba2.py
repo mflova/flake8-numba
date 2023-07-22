@@ -258,8 +258,8 @@ class NBA209(Rule):
 
         if outputs_to_be_modified:
             msg = (
-                "NBA209: Not all output variables are assigned "
-                f"{list(outputs_to_be_modified)}"
+                "NBA209: Not all output variables are assigned: "
+                f"{','.join(list(outputs_to_be_modified))}"
             )
             return Error(location.line, location.column, message=msg)
         return None

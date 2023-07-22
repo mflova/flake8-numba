@@ -24,3 +24,22 @@ class NBA101(Rule):
             msg = "NBA101: Only one value can be returned."
             return Error(statement.lineno, statement.col_offset, msg)
         return None
+
+
+class NBA102(Rule):
+    """Expected return value for the function."""
+
+    def _check(self, node: ast.FunctionDef) -> Optional[Error]:
+        if not is_decorated_with("vectorize", node):
+            return None
+
+        return_count = 0
+        import astpretty
+
+        # Check the 'return' statement in the function body
+        for statement in node.body:
+            if isinstance(statement, ast.Return):
+                return None
+
+        msg = "NBA102: Functions decorated with `vectorize` must have one return value"
+        return Error(statement.lineno, statement.col_offset, msg)
