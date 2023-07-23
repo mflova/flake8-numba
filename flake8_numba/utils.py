@@ -204,6 +204,19 @@ def _dct_custom_alias_to_standard_numba() -> Mapping[str, str]:
     return dct_aliases
 
 
+def is_str_safe(string: str) -> bool:
+    """Returns `True` if the string representation is safe to be evaluated."""
+    string = string.replace("numba.", "")
+    string = string.replace("nb.", "")
+    keywords = set(_dct_custom_alias_to_standard_numba().keys())
+    separators = {"[", "]", " ", "(", ")", ",", '"', "'", ":"}
+    keywords.update(separators)
+
+    for keyword in keywords:
+        string = string.replace(keyword, "")
+    return not string
+
+
 def get_pos_arg_from_decorator(
     at: int, node: ast.FunctionDef
 ) -> tuple[Optional[object], Location]:
@@ -228,9 +241,16 @@ def get_pos_arg_from_decorator(
     original_str = ast.unparse(arg)
     custom_to_standard = _dct_custom_alias_to_standard_numba()
     new_str = original_str
+
+    # Avoid strings being evaluated as strings
+    if at == 0 and new_str[0] in ("'", '"') and new_str[-1] in ("'", '"'):
+        new_str = new_str[1:-1]
+
     while True:
         try:
-            return eval(new_str), location  # noqa: PGH001
+            if is_str_safe(new_str):
+                return eval(new_str), location  # noqa: PGH001
+            return original_str, location
         except NameError as name_error:
             not_found_variable_name = name_error.args[0].split()[1].strip("'")
             if not_found_variable_name == "nb":

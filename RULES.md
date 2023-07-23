@@ -36,7 +36,7 @@ class A:
 
 ## NBA007
 
-Expected X type for the first positional argument. Depending on the decorator you use,
+Expected a list for the first positional argument. Depending on the decorator you use,
 message will differ:
 
 - `@guvectorize`: Expects a list of tuples
