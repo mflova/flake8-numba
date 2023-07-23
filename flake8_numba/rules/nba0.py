@@ -20,7 +20,7 @@ class NBA001(Rule):
         )
 
         if is_decorated_with("guvectorize", node):
-            decorator_signatures, location = get_pos_arg_from_decorator(0, node)
+            decorator_signatures, _, location = get_pos_arg_from_decorator(0, node)
             if not isinstance(decorator_signatures, list) or not isinstance(
                 decorator_signatures[0], tuple
             ):
@@ -33,7 +33,7 @@ class NBA001(Rule):
             return None
 
         if is_decorated_with("vectorize", node):
-            decorator_signatures, location = get_pos_arg_from_decorator(0, node)
+            decorator_signatures, _, location = get_pos_arg_from_decorator(0, node)
             if not isinstance(decorator_signatures, list):
                 return None
 
@@ -63,7 +63,7 @@ class NBA005(Rule):
         args_func_signature = len(node.args.args)
 
         if is_decorated_with("guvectorize", node):
-            decorator_signatures, location = get_pos_arg_from_decorator(0, node)
+            decorator_signatures, _, location = get_pos_arg_from_decorator(0, node)
             if not isinstance(decorator_signatures, list) or not isinstance(
                 decorator_signatures[0], tuple
             ):
@@ -75,7 +75,7 @@ class NBA005(Rule):
             return None
 
         if is_decorated_with("vectorize", node):
-            decorator_signatures, location = get_pos_arg_from_decorator(0, node)
+            decorator_signatures, _, location = get_pos_arg_from_decorator(0, node)
             if not isinstance(decorator_signatures, list):
                 return None
 
@@ -121,17 +121,15 @@ class NBA007(Rule):
         if get_decorator_n_args(node, "args") == 0:
             return None
 
-        first_arg, location = get_pos_arg_from_decorator(0, node)
+        first_arg, _, location = get_pos_arg_from_decorator(0, node)
         if is_decorated_with("guvectorize", node):
             msg = (
-                "NBA007: Expected a list of tuples for first positional argument. Each"
-                " one containing a valid signature of the type `(*input_types, *rtypes)`."
+                "NBA007: Expected a list of signatures for first positional argument. "
+                "Each one containing a valid signature of the type "
+                "`(*input_types, *rtypes)` or `void(*input_types, *rtypes)."
             )
             if not isinstance(first_arg, list):
                 return Error(location.line, location.column, msg)
-            for signature in first_arg:
-                if not isinstance(signature, tuple):
-                    return Error(location.line, location.column, msg)
             return None
         if is_decorated_with("vectorize", node):
             msg = (

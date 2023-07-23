@@ -9,6 +9,10 @@ def move_mean(a, window_arr, out):
 def sinc(x):
     return 2
 
+@vectorize("[f8(f8), f4(f4)]")
+def sinc(x):
+    return 2
+
 @vectorize([int8(int8,int8),
             int16(int16,int16),
             int32(int32,int32),
@@ -17,6 +21,14 @@ def sinc(x):
             f8(f8,f8)])
 def add(x,y):
     return 2
+
+@guvectorize([void(int8,int8), void(f8,f8)], "() -> ()")
+def add(x,y, out):
+    out[:] = 2
+
+@guvectorize("[void(int8,int8), void(f8,f8)]", "() -> ()")
+def add(x,y, out):
+    out[:] = 2
 
 @vectorize([f8(f8), f4(f4)])
 def logit(x):
