@@ -9,6 +9,7 @@ from flake8_numba.utils import (
     Location,
     get_decorator_location,
     get_decorator_n_args,
+    get_numba_signature_info,
     get_pos_arg_from_decorator,
     has_return_value,
     is_decorated_with,
@@ -19,19 +20,22 @@ class NBA201(Rule):
     """Non matching number of inputs/outputs between both positional arguments."""
 
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:
-        first_arg, _ = get_pos_arg_from_decorator(0, node)
-        second_arg, location = get_pos_arg_from_decorator(1, node)
-        if not isinstance(second_arg, str) or not isinstance(first_arg, list):
+        first = get_pos_arg_from_decorator(0, node)
+        second = get_pos_arg_from_decorator(1, node)
+        if not isinstance(second.numba_signature, str) or not isinstance(
+            first.numba_signature, list
+        ):
             return None
-        len_second_arg = Counter(second_arg)["("]
+        len_second_arg = Counter(second.numba_signature)["("]
 
-        for idx, signature in enumerate(first_arg):
-            if len(signature) != len_second_arg:
+        for idx, signature in enumerate(first.numba_signature):
+            n_args = get_numba_signature_info(signature, mode="n_args")
+            if n_args != len_second_arg:
                 msg = (
                     f"NBA201: Number of inputs/outputs in first signature ({idx}) is not "
                     "matching the one provided in the second argument."
                 )
-                return Error(location.line, location.column, msg)
+                return Error(first.location.line, first.location.column, msg)
         return None
 
     @property
@@ -43,17 +47,17 @@ class NBA202(Rule):
     """Non matching sizes of inputs/outputs between both positional arguments."""
 
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:
-        first_arg, _ = get_pos_arg_from_decorator(0, node)
-        first_arg = cast(list[tuple[Any, ...]], first_arg)
-        second_arg, location = get_pos_arg_from_decorator(1, node)
+        first = get_pos_arg_from_decorator(0, node)
+        first_arg = cast(list[tuple[Any, ...]], first.numba_signature)
+        second = get_pos_arg_from_decorator(1, node)
 
         # Get sizes from second positional argument
         pattern = r"\(((?:[a-zA-Z]+(?:,\s*[a-zA-Z]+)*)?)\)"
         sizes_from_second_arg: list[int] = []
         symbol: str
-        if second_arg is None or not isinstance(second_arg, str):
+        if second.numba_signature is None or not isinstance(second.numba_signature, str):
             return None
-        for match in re.findall(pattern, second_arg):
+        for match in re.findall(pattern, second.numba_signature):
             count = 0
             for symbol in match:
                 if symbol.isalpha():
@@ -63,7 +67,7 @@ class NBA202(Rule):
         sizes_from_first_arg: list[int] = []
         for signature in first_arg:
             sizes_from_first_arg = []
-            for value in signature:
+            for value in get_numba_signature_info(signature, mode="args"):
                 if hasattr(value, "ndim"):
                     sizes_from_first_arg.append(value.ndim)
                 else:
@@ -74,7 +78,7 @@ class NBA202(Rule):
                     f"and second positional argument ({sizes_from_second_arg}) are "
                     "not matching."
                 )
-                return Error(location.line, location.column, msg)
+                return Error(second.location.line, second.location.column, msg)
         return None
 
     @property
@@ -86,7 +90,8 @@ class NBA203(Rule):
     """Undefined symbol in second positional argument."""
 
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:
-        signature, location = get_pos_arg_from_decorator(1, node)
+        second = get_pos_arg_from_decorator(1, node)
+        signature = second.numba_signature
         if not isinstance(signature, str):
             return None
         count = Counter(signature)
@@ -98,7 +103,7 @@ class NBA203(Rule):
         for elem in diff:
             if elem.isalpha():
                 msg = f"NBA203: Symbol `{elem}` must be also defined on the left side."
-                return Error(location.line, location.column, msg)
+                return Error(second.location.line, second.location.column, msg)
 
         return None
 
@@ -111,7 +116,7 @@ class NBA204(Rule):
     """Constants are not allowed in second positional argument."""
 
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:
-        signature, location = get_pos_arg_from_decorator(1, node)
+        signature, _, location = get_pos_arg_from_decorator(1, node)
         if not isinstance(signature, str):
             return None
         count = Counter(signature)
@@ -153,7 +158,7 @@ class NBA206(Rule):
             return None
         if get_decorator_n_args(node, "args") != 2:
             return None
-        signature, location = get_pos_arg_from_decorator(1, node)
+        signature, _, location = get_pos_arg_from_decorator(1, node)
         if not isinstance(signature, str):
             return None
         counter = Counter(signature)
@@ -176,7 +181,7 @@ class NBA207(Rule):
             or get_decorator_n_args(node, "args") != 2
         ):
             return None
-        signature, location = get_pos_arg_from_decorator(1, node)
+        signature, _, location = get_pos_arg_from_decorator(1, node)
         if signature is None:
             return None
 
@@ -202,10 +207,11 @@ class NBA208(Rule):
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:
         if is_decorated_with("guvectorize", node):
             first_arg = get_pos_arg_from_decorator(0, node)
+            second_arg = get_pos_arg_from_decorator(1, node)
 
             msg = (
-                "NBA208: Guvectorize strictly needs two positional arguments: list "
-                "of tuples and string"
+                "NBA208: Guvectorize strictly needs two positional arguments: string/list"
+                " for the first one and string for the second."
             )
             location = get_decorator_location("guvectorize", node)
             location = cast(Location, location)
@@ -214,11 +220,8 @@ class NBA208(Rule):
             if isinstance(first_arg[0], list):
                 if len(first_arg[0]) == 0:
                     return Error(location.line, location.column, msg)
-                for elem in first_arg[0]:
-                    if not isinstance(elem, tuple):
-                        return Error(location.line, location.column, msg)
-                return None
-            return Error(location.line, location.column, msg)
+            if not isinstance(second_arg.ast_expr, ast.Str):
+                return Error(location.line, location.column, msg)
         return None
 
     @property
@@ -230,7 +233,7 @@ class NBA209(Rule):
     """Output value is not assigned with guvectorize."""
 
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:
-        str_signature, location = get_pos_arg_from_decorator(1, node)
+        str_signature, _, location = get_pos_arg_from_decorator(1, node)
         if not isinstance(str_signature, str):
             return None
 
@@ -273,7 +276,7 @@ class NBA211(Rule):
     """Arrays in second pos argument must be separated by commas."""
 
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:
-        second_arg, location = get_pos_arg_from_decorator(1, node)
+        second_arg, _, location = get_pos_arg_from_decorator(1, node)
         if not isinstance(second_arg, str):
             return None
 
@@ -308,7 +311,7 @@ class NBA212(Rule):
     """Do not assign en input variables."""
 
     def _check(self, node: ast.FunctionDef) -> Optional[Error]:
-        str_signature, location = get_pos_arg_from_decorator(1, node)
+        str_signature, _, location = get_pos_arg_from_decorator(1, node)
         if not isinstance(str_signature, str):
             return None
 

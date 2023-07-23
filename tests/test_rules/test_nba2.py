@@ -146,8 +146,6 @@ def test_nba207(
         ("nba2/func", False),
         ("nba2/guvec", True),
         ("nba2/guvec_with_one_pos_arg", True),
-        ("nba2/guvec_with_two_pos_arg_wrong_type", True),
-        ("nba2/guvec_with_two_pos_arg_wrong_type2", True),
         ("nba2/guvec_with_second_arg_wrong_type", True),
     ],
 )

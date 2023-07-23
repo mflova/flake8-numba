@@ -1,7 +1,7 @@
 import ast
 from collections.abc import Iterable, Mapping, Sequence
 from functools import lru_cache
-from typing import Literal, NamedTuple, Optional, Union, overload
+from typing import Any, Literal, NamedTuple, Optional, Union, overload
 
 import numba  # noqa: F401
 
@@ -192,6 +192,7 @@ def _dct_custom_alias_to_standard_numba() -> Mapping[str, str]:
         ({"double", "f8", "float64"}, "numba.float64"),
         ({"complex64", "c8"}, "numba.complex64"),
         ({"complex128", "c16"}, "numba.complex128"),
+        ({"void"}, "numba.void"),
     ]
 
     possible_prefix = ("nb.", "")
@@ -209,6 +210,7 @@ def is_str_safe(string: str) -> bool:
     string = string.replace("numba.", "")
     string = string.replace("nb.", "")
     keywords = set(_dct_custom_alias_to_standard_numba().keys())
+    keywords.update("-", ">")
     separators = {"[", "]", " ", "(", ")", ",", '"', "'", ":"}
     keywords.update(separators)
 
@@ -217,9 +219,45 @@ def is_str_safe(string: str) -> bool:
     return not string
 
 
-def get_pos_arg_from_decorator(
-    at: int, node: ast.FunctionDef
-) -> tuple[Optional[object], Location]:
+@overload
+def get_numba_signature_info(signature: Any, *, mode: Literal["n_args"]) -> int:
+    ...
+
+
+@overload
+def get_numba_signature_info(signature: Any, *, mode: Literal["args"]) -> Any:
+    ...
+
+
+def get_numba_signature_info(signature: Any, *, mode: Literal["n_args", "args"]) -> Any:
+    """Get number of input arguments from a given signature.
+
+    Signatures can be defined as "void(float32, float32)" or as "(float32, float32)".
+    Depending on how it is defined, number of arguments is located in a different place.
+    First one will create a `numba.Signature` object. Second on an iterable and sized
+    based.
+    """
+    if mode == "n_args":
+        if hasattr(signature, "args"):
+            return len(signature.args)
+        return len(signature)
+    if mode == "args":
+        if hasattr(signature, "args"):
+            return signature.args
+        return signature
+    raise ValueError(f"Not recognized mode: {mode}")
+
+
+class ObjectRepr(NamedTuple):
+    numba_signature: Optional[object]
+    """Numba signature of the object. As a string if object is not safe."""
+    ast_expr: Optional[ast.expr]
+    """AST representation of the retrieved object."""
+    location: Location
+    """Location of the object"""
+
+
+def get_pos_arg_from_decorator(at: int, node: ast.FunctionDef) -> ObjectRepr:
     """Get the indicated positional argument.
 
     Args:
@@ -227,14 +265,15 @@ def get_pos_arg_from_decorator(
         node (ast.FunctionDef): Node representing the function definition.
 
     Returns:
-        tuple[Optional[object], Location]: Argument as an `object` if the code could
-            be evaluated (including `numba` library), string representation otherwise.
+        tuple[Optional[object], ast.exprt, Location]: Argument as an `object` if the code
+            could be evaluated (including `numba` library), string representation
+            otherwise.
     """
     if not node.decorator_list or not decorator_has_arguments(node):
-        return None, Location()
+        return ObjectRepr(None, None, Location())
 
     if at >= get_decorator_n_args(node, "args"):
-        return None, Location()
+        return ObjectRepr(None, None, Location())
 
     arg = node.decorator_list[0].args[at]  # type: ignore
     location = Location(line=arg.lineno, column=arg.col_offset)
@@ -249,8 +288,8 @@ def get_pos_arg_from_decorator(
     while True:
         try:
             if is_str_safe(new_str):
-                return eval(new_str), location  # noqa: PGH001
-            return original_str, location
+                return ObjectRepr(eval(new_str), arg, location)  # noqa: PGH001
+            return ObjectRepr(original_str, arg, location)
         except NameError as name_error:
             not_found_variable_name = name_error.args[0].split()[1].strip("'")
             if not_found_variable_name == "nb":
@@ -260,6 +299,6 @@ def get_pos_arg_from_decorator(
                     not_found_variable_name, custom_to_standard[not_found_variable_name]
                 )
             else:
-                return original_str, location
+                return ObjectRepr(original_str, arg, location)
         except Exception:  # noqa: BLE001
-            return None, Location()
+            return ObjectRepr(None, arg, Location())

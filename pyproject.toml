@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flake8_numba"
-version = "0.3.0"
+version = "0.4.0"
 description = "Perform checks over numba usage"
 authors = ["Manuel Floriano Vázquez <mflovaa@gmail.com>"]
 readme = "README.md"
